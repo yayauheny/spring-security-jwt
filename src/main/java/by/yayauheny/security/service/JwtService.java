@@ -1,4 +1,4 @@
-package by.yayauheny.security.config;
+package by.yayauheny.security.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

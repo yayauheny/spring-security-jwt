@@ -1,20 +1,23 @@
 package by.yayauheny.security.service;
 
-import by.yayauheny.security.config.JwtService;
 import by.yayauheny.security.dto.AuthenticationResponse;
 import by.yayauheny.security.dto.RegisterRequest;
 import by.yayauheny.security.entity.Role;
 import by.yayauheny.security.entity.User;
 import by.yayauheny.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationService {
+public class AuthenticationService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -45,5 +48,11 @@ public class AuthenticationService {
                 .orElseThrow();
         String token = jwtService.generateToken(user);
         return new AuthenticationResponse(token);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Failed to retrieve user: " + username));
     }
 }
