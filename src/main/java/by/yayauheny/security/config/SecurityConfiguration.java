@@ -1,5 +1,6 @@
 package by.yayauheny.security.config;
 
+import by.yayauheny.security.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -24,17 +26,17 @@ public class SecurityConfiguration {
     private static final String[] WHITE_LIST_URL = {"/api/auth/**"};
     private final JwtAuthenticationFilter jwtFilter;
     private final AuthenticationProvider authenticationProvider;
-    private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
 
     public SecurityConfiguration(
+            @Lazy
             JwtAuthenticationFilter jwtFilter,
             @Lazy
             AuthenticationProvider authenticationProvider,
-            @Lazy
-            UserDetailsService userDetailsService) {
+            UserRepository userRepository) {
         this.jwtFilter = jwtFilter;
         this.authenticationProvider = authenticationProvider;
-        this.userDetailsService = userDetailsService;
+        this.userRepository = userRepository;
     }
 
     @Bean
@@ -56,7 +58,7 @@ public class SecurityConfiguration {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setUserDetailsService(userDetailsService());
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
@@ -69,5 +71,11 @@ public class SecurityConfiguration {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return username -> userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 }

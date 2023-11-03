@@ -1,9 +1,10 @@
 package by.yayauheny.security.controller;
 
-import by.yayauheny.security.dto.AuthenticationRequest;
 import by.yayauheny.security.dto.AuthenticationResponse;
 import by.yayauheny.security.dto.RegisterRequest;
 import by.yayauheny.security.service.AuthenticationService;
+import by.yayauheny.security.utils.ControllerUtils;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,16 +21,21 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
-            @RequestBody RegisterRequest request
+            @RequestBody RegisterRequest request,
+            HttpServletResponse response
     ) {
-        return ResponseEntity.ok(authenticationService.register(request));
+        AuthenticationResponse authenticationResponse = authenticationService.register(request);
+        ControllerUtils.setHttpOnlySecureCookie(response, "token", authenticationResponse.token());
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(
-            @RequestBody RegisterRequest request
+            @RequestBody RegisterRequest request,
+            HttpServletResponse response
     ) {
-        return ResponseEntity.ok(authenticationService.authenticate(request));
+        AuthenticationResponse authenticationResponse = authenticationService.authenticate(request);
+        ControllerUtils.setHttpOnlySecureCookie(response, "token", authenticationResponse.token());
+        return ResponseEntity.ok().build();
     }
-
 }

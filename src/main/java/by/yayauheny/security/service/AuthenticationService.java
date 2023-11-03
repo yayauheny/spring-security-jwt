@@ -6,18 +6,15 @@ import by.yayauheny.security.entity.Role;
 import by.yayauheny.security.entity.User;
 import by.yayauheny.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationService implements UserDetailsService {
+public class AuthenticationService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -32,7 +29,7 @@ public class AuthenticationService implements UserDetailsService {
                 .password(passwordEncoder.encode(request.password()))
                 .role(Role.USER)
                 .build();
-        User savedUser = userRepository.save(user);
+        userRepository.save(user);
         String token = jwtService.generateToken(user);
         return new AuthenticationResponse(token);
     }
@@ -45,14 +42,8 @@ public class AuthenticationService implements UserDetailsService {
                 )
         );
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow();
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         String token = jwtService.generateToken(user);
         return new AuthenticationResponse(token);
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Failed to retrieve user: " + username));
     }
 }

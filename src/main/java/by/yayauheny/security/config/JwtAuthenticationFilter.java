@@ -23,9 +23,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(JwtService jwtService,
-                                   @Lazy
-                                   UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(
+            JwtService jwtService,
+            UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
     }
@@ -50,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (jwtService.validateToken(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
-                            null,
+                            userDetails.getPassword(),
                             userDetails.getAuthorities()
                     );
                     authToken.setDetails(
