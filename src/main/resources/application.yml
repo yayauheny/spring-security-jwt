@@ -20,4 +20,4 @@ spring:
           google:
             client-id: 351746911268-dmr2s92htd2fltonl2q4g0067t37n5gi.apps.googleusercontent.com
             client-secret: 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
-            redirect-uri: https://localhost:8080/login/oauth2/code/google
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
