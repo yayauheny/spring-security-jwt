@@ -3,6 +3,7 @@ package by.yayauheny.security.config;
 import by.yayauheny.security.service.JwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.lang.NonNull;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Optional;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -35,14 +38,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        String authHeader = request.getHeader("Authorization");
-        String jwt;
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null || Arrays.stream(cookies).noneMatch(cookie -> cookie.getName().equals("token"))) {
             filterChain.doFilter(request, response);
             return;
         }
-        jwt = authHeader.substring(7);
-        if (!jwt.isEmpty()) {
+        Optional<String> token = Arrays.stream(cookies)
+                .filter(cookie -> cookie.getName().equals("token"))
+                .map(Cookie::getValue)
+                .findAny();
+        if (token.isPresent()) {
+            String jwt = token.get();
             String userEmail = jwtProvider.extractUsername(jwt);
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);

@@ -11,6 +11,7 @@ public class ControllerUtils {
                                                String cookieName,
                                                String cookieValue) {
         Cookie cookie = new Cookie(cookieName, cookieValue);
+        cookie.setMaxAge(24 * 60 * 60);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         response.addCookie(cookie);

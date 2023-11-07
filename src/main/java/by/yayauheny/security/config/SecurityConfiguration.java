@@ -35,7 +35,7 @@ import java.util.Set;
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
-    private static final String[] WHITE_LIST_URL = {"/api/auth/**", "/api/demo/**"};
+    private static final String[] WHITE_LIST_URL = {"/api/auth/**"};
     private final JwtAuthenticationFilter jwtFilter;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -63,39 +63,17 @@ public class SecurityConfiguration {
                                 .permitAll()
                                 .anyRequest().authenticated()
                 )
-                .formLogin(Customizer.withDefaults())
-//                .oauth2Login(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .oauth2Login(config ->
-                        config.userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService())))
                 .build();
     }
 
     private OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() {
         return userRequest -> {
             String email = userRequest.getIdToken().getClaim("email");
-//            try {
             UserDetails userDetails = userDetailsService().loadUserByUsername(email);
             DefaultOidcUser oidcUser = new DefaultOidcUser(userDetails.getAuthorities(), userRequest.getIdToken());
-//            } catch (UsernameNotFoundException e) {
-//                String fullname = userRequest.getIdToken().getClaim("name");
-//                String[] nameArray = fullname.split(" ");
-//                String firstname = nameArray[0];
-//                String lastname = nameArray[1];
-//
-//                AuthenticationResponse authenticationResponse = authenticationService.register(
-//                        new RegisterRequest(
-//                                firstname,
-//                                lastname,
-//                                email,
-//                                "defaultPass",
-//                                Role.USER.name()
-//                        )
-//                );
-//            }
-
             Set<Method> userDetailsMethods = Set.of(UserDetails.class.getMethods());
 
             return (OidcUser) Proxy.newProxyInstance(SecurityConfiguration.class.getClassLoader(),
