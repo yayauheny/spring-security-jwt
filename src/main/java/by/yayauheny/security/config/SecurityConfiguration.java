@@ -35,23 +35,32 @@ import java.util.Set;
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
-    private static final String[] WHITE_LIST_URL = {"/api/auth/**"};
+    private static final String[] WHITE_LIST_URL = {
+            "/api/auth/**",
+            "/swagger-ui/index.html",
+            "/v3/api-docs",
+            "/v3/api-docs/**",
+            "/swagger/resources",
+            "/swagger/resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "/swagger-ui/**",
+            "/webjars/**",
+            "/swagger-ui.html"
+    };
     private final JwtAuthenticationFilter jwtFilter;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationService authenticationService;
 
     public SecurityConfiguration(
             @Lazy
             JwtAuthenticationFilter jwtFilter,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            @Lazy
-            AuthenticationService authenticationService) {
+            PasswordEncoder passwordEncoder
+            ) {
         this.jwtFilter = jwtFilter;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.authenticationService = authenticationService;
     }
 
     @Bean
