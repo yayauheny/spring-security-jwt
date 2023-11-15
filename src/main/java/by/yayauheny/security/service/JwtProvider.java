@@ -1,4 +1,4 @@
-package by.yayauheny.security.config;
+package by.yayauheny.security.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -7,7 +7,6 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -16,7 +15,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
-public class JwtService {
+public class JwtProvider {
 
     private static final String SECURE_PASS = "BcxY4z5Zh4KXfFx1nL/n555FoNo8Ov3oNfcLSPv3hME=";
 

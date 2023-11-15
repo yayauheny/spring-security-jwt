@@ -1,6 +1,5 @@
 package by.yayauheny.security.service;
 
-import by.yayauheny.security.config.JwtService;
 import by.yayauheny.security.dto.AuthenticationResponse;
 import by.yayauheny.security.dto.RegisterRequest;
 import by.yayauheny.security.entity.Role;
@@ -9,6 +8,7 @@ import by.yayauheny.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ public class AuthenticationService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+    private final JwtProvider jwtProvider;
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
@@ -27,10 +27,10 @@ public class AuthenticationService {
                 .lastname(request.lastname())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
-                .role(Role.USER)
+                .role(Role.valueOf(request.role()))
                 .build();
-        User savedUser = userRepository.save(user);
-        String token = jwtService.generateToken(user);
+        userRepository.save(user);
+        String token = jwtProvider.generateToken(user);
         return new AuthenticationResponse(token);
     }
 
@@ -42,8 +42,8 @@ public class AuthenticationService {
                 )
         );
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow();
-        String token = jwtService.generateToken(user);
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        String token = jwtProvider.generateToken(user);
         return new AuthenticationResponse(token);
     }
 }
